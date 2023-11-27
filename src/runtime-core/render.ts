@@ -6,13 +6,13 @@ import { createComponentInstance, setupComponent } from './component'
  * @param vnode 虚拟DOM
  * @param container 容器
  */
-function mountComponent(vnode, container) {
+function mountComponent(initialVNode, container) {
   // 获取组件实例
-  const instance = createComponentInstance(vnode)
+  const instance = createComponentInstance(initialVNode)
   // 执行setup方法
   setupComponent(instance)
   // 执行渲染effect
-  setupRenderEffect(instance, container, vnode)
+  setupRenderEffect(instance, container, initialVNode)
 }
 
 function processComponent(vnode, container) {
@@ -57,11 +57,11 @@ function mountElement(vnode, container) {
  * @param instance
  * @param container
  */
-function setupRenderEffect(instance, container, vnode) {
+function setupRenderEffect(instance, container, initialVNode) {
   const { proxy } = instance
   const subTree = instance.render.call(proxy)
   patch(subTree, container)
-  vnode.el = subTree.el
+  initialVNode.el = subTree.el
 }
 
 /**

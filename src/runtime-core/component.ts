@@ -1,3 +1,5 @@
+import { publicInstancceProxyHnadlers } from './componentPublicInstance'
+
 /**
  * 创建组件实例
  * @param {object} vnode 虚拟DOM
@@ -23,20 +25,7 @@ function setupStatefulComponent(instance) {
     const setupResult = setup()
     handleSetupResult(instance, setupResult)
   }
-  instance.proxy = new Proxy(
-    {},
-    {
-      get(target, key) {
-        const { setupState } = instance
-        if (key in setupState) {
-          return setupState[key]
-        }
-        if (key === '$el') {
-          return instance.vnode.el
-        }
-      }
-    }
-  )
+  instance.proxy = new Proxy({ _: instance }, publicInstancceProxyHnadlers)
 }
 
 function handleSetupResult(instance, setupResult) {
