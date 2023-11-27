@@ -4,8 +4,8 @@
  * @returns
  */
 export function isObject(target) {
-  const type = typeof target;
-  return target !== null && (type === "object" || type === "function");
+  const type = typeof target
+  return target !== null && (type === 'object' || type === 'function')
 }
 
 /**
@@ -15,5 +15,5 @@ export function isObject(target) {
  * @returns
  */
 export function hasChanged(oldValue, newValue) {
-  return !Object.is(oldValue, newValue);
+  return !Object.is(oldValue, newValue)
 }

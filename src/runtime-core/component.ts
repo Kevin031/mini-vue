@@ -6,29 +6,52 @@
 export function createComponentInstance(vnode) {
   const component = {
     vnode,
-  };
-  return component;
+    type: vnode.type,
+    setupState: {}
+  }
+  return component
 }
 
 /**
  * 创建有状态的组件
  * @param {object} instance 组件实例
  */
-function setupStatefulComponent(instance) {}
+function setupStatefulComponent(instance) {
+  const Component = instance.type
+  const { setup } = Component
+  if (typeof setup === 'function') {
+    const setupResult = setup()
+    handleSetupResult(instance, setupResult)
+  }
+  instance.proxy = new Proxy(
+    {},
+    {
+      get(target, key) {
+        const { setupState } = instance
+        if (key in setupState) {
+          return setupState[key]
+        }
+        if (key === '$el') {
+          return instance.vnode.el
+        }
+      }
+    }
+  )
+}
 
 function handleSetupResult(instance, setupResult) {
-  if (typeof setupResult === "object") {
-    instance.setupState = setupResult;
+  if (typeof setupResult === 'object') {
+    instance.setupState = setupResult
   }
 
-  finishedComponentSetup(instance);
+  finishedComponentSetup(instance)
 }
 
 function finishedComponentSetup(instance) {
-  const Component = instance.vnode.type;
+  const Component = instance.vnode.type
 
   if (!instance.render) {
-    instance.render = Component.render;
+    instance.render = Component.render
   }
 }
 
@@ -38,13 +61,7 @@ function finishedComponentSetup(instance) {
  */
 export function setupComponent(instance) {
   // initProps
-  const Component = instance.vnode?.type;
-  const { setup } = Component;
+  const Component = instance.type
 
-  if (typeof setup === "function") {
-    const setupResult = setup();
-    handleSetupResult(instance, setupResult);
-  }
-
-  setupStatefulComponent(instance);
+  setupStatefulComponent(instance)
 }

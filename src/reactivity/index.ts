@@ -6,7 +6,7 @@
 
 // export { reactive, ref, effect, computed, stop, readonly, isReactive };
 
-export * from "./reactive";
-export * from "./effect";
-export * from "./computed";
-export * from "./ref";
+export * from './reactive'
+export * from './effect'
+export * from './computed'
+export * from './ref'

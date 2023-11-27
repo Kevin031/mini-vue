@@ -1,12 +1,12 @@
-import { createVNode } from "./vnode";
-import { render } from "./render";
+import { createVNode } from './vnode'
+import { render } from './render'
 
-export function createApp(rootComponent, rootContainer) {
+export function createApp(rootComponent) {
   return {
-    mount() {
-      const vnode = createVNode(rootComponent);
+    mount(rootContainer) {
+      const vnode = createVNode(rootComponent)
 
-      render(vnode, rootContainer);
-    },
-  };
+      render(vnode, document.querySelector(rootContainer))
+    }
+  }
 }

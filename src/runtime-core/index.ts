@@ -1,3 +1,3 @@
-export * from "./createApp";
-export * from "./render";
-export * from "./h";
+export * from './createApp'
+export * from './render'
+export * from './h'
