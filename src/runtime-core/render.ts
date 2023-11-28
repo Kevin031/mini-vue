@@ -3,6 +3,7 @@ import { ShapeFlags } from '../shared/shapeFlags'
 import { createComponentInstance, setupComponent } from './component'
 import { Fragment, Text } from './vnode'
 import { createAppAPI } from './createApp'
+import { effect } from '../reactivity'
 
 /**
  * 自定义渲染器
@@ -16,8 +17,9 @@ export function createRenderer(options) {
    * @param vnode 虚拟DOM
    * @param container 容器
    */
-  function mountComponent(initialVNode, container, parent) {
+  function mountComponent(n1, n2, container, parent) {
     // 获取组件实例
+    const initialVNode = n2
     const instance = createComponentInstance(initialVNode, parent)
     // 执行setup方法
     setupComponent(instance)
@@ -25,26 +27,34 @@ export function createRenderer(options) {
     setupRenderEffect(instance, container, initialVNode)
   }
 
-  function processComponent(vnode, container, parent) {
-    mountComponent(vnode, container, parent)
+  function processComponent(n1, n2, container, parent) {
+    mountComponent(n1, n2, container, parent)
   }
 
-  function processElement(vnode, container, parent) {
-    mountElement(vnode, container, parent)
+  function processElement(n1, n2, container, parent) {
+    if (n1) {
+      patchElememnt(n1, n2, container, parent)
+    } else {
+      mountElement(n2, container, parent)
+    }
   }
 
-  function processFragment(vnode, container, parent) {
-    mountChildren(vnode.children, container, parent)
+  function processFragment(n1, n2, container, parent) {
+    mountChildren(n2, container, parent)
   }
 
-  function processText(vnode, container, parent) {
-    mountTextNode(vnode, container, parent)
+  function processText(n1, n2, container, parent) {
+    mountTextNode(n2, container, parent)
   }
 
-  function mountChildren(children, el, parent) {
-    children.forEach(vnode => {
-      patch(vnode, el, parent)
+  function mountChildren(vnode, el, parent) {
+    vnode.children.forEach(vnode => {
+      patch(null, vnode, el, parent)
     })
+  }
+
+  function patchElememnt(n1, n2, container, parent) {
+    console.log('patchElememnt', n1, n2)
   }
 
   /**
@@ -61,7 +71,7 @@ export function createRenderer(options) {
       el.textContent = children
     } else if (shapeFlag & ShapeFlags.ARRAY_CHILDREN) {
       // 渲染array children
-      mountChildren(children, el, parent)
+      mountChildren(vnode, el, parent)
     }
     for (let prop in vnode.props) {
       const value = vnode.props[prop]
@@ -87,10 +97,21 @@ export function createRenderer(options) {
    * @param container
    */
   function setupRenderEffect(instance, container, initialVNode) {
-    const { proxy } = instance
-    const subTree = instance.render.call(proxy)
-    patch(subTree, container, instance)
-    initialVNode.el = subTree.el
+    effect(() => {
+      const { proxy } = instance
+      if (!instance.isMounted) {
+        const subTree = instance.render.call(proxy)
+        instance.subTree = subTree
+        patch(null, subTree, container, instance)
+        initialVNode.el = subTree.el
+        instance.isMounted = true
+      } else {
+        const subTree = instance.render.call(proxy)
+        const preSubTree = instance.subTree
+        instance.subTree = subTree
+        patch(preSubTree, subTree, container, instance)
+      }
+    })
   }
 
   /**
@@ -98,23 +119,23 @@ export function createRenderer(options) {
    * @param vnode
    * @param container
    */
-  function patch(vnode, container, parent) {
-    const { shapeFlag, type } = vnode
+  function patch(n1, n2, container, parent) {
+    const { shapeFlag, type } = n2
 
     switch (type) {
       case Fragment:
-        processFragment(vnode, container, parent)
+        processFragment(n1, n2, container, parent)
         break
       case Text:
-        processText(vnode, container, parent)
+        processText(n1, n2, container, parent)
         break
       default:
         if (shapeFlag & ShapeFlags.ELEMENT) {
           // 渲染普通节点
-          processElement(vnode, container, parent)
+          processElement(n1, n2, container, parent)
         } else if (shapeFlag & ShapeFlags.STATEFUL_COMPONENT) {
           // 渲染组件
-          processComponent(vnode, container, parent)
+          processComponent(n1, n2, container, parent)
         }
         break
     }
@@ -122,7 +143,7 @@ export function createRenderer(options) {
 
   function render(vnode, rootContainer, parent) {
     // patch
-    patch(vnode, rootContainer, parent)
+    patch(null, vnode, rootContainer, parent)
   }
 
   return {

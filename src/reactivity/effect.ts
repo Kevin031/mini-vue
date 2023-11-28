@@ -96,7 +96,7 @@ export function track(target, type, key) {
     // console.log(`%c[${type}]`, "color: red");
     return
   }
-  // console.log(`%c[${type}]`, "color: red", key);
+  // console.log(`%c[${type}]`, 'color: red', key)
 }
 
 /**

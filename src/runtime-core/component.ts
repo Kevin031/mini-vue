@@ -3,6 +3,7 @@ import { initProps } from './componentProps'
 import { initSlots } from './componentSlots'
 import { shallowReadonly } from '../reactivity'
 import { emit } from './componentEmit'
+import { proxyRefs } from '../reactivity'
 
 /**
  * 调用setup的时候，指向当前的组件
@@ -25,7 +26,8 @@ export function createComponentInstance(vnode, parent) {
     setupState: {},
     parent,
     provides: {},
-    emit: () => {}
+    emit: () => {},
+    isMounted: false
   }
 
   component.emit = emit.bind(null, component) as any
@@ -53,7 +55,7 @@ function setupStatefulComponent(instance) {
 
 function handleSetupResult(instance, setupResult) {
   if (typeof setupResult === 'object') {
-    instance.setupState = setupResult
+    instance.setupState = proxyRefs(setupResult)
   }
 
   finishedComponentSetup(instance)
