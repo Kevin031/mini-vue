@@ -33,7 +33,7 @@ class RefImpl {
 export function proxyRefs(objectWithRefs) {
   return new Proxy(objectWithRefs, {
     get(target, key) {
-      return unRef(Reflect.get(target.value, key))
+      return unRef(Reflect.get(target, key))
     },
     set(target, key, value) {
       if (isRef(target[key])) {

@@ -33,9 +33,9 @@ describe('unRef', () => {
 })
 
 describe('proxyRefs', () => {
-  const user = ref({
-    age: 20
-  })
+  const user = {
+    age: ref(20)
+  }
   it('get', () => {
     const proxyUser = proxyRefs(user)
     expect(proxyUser.age).toBe(20)
