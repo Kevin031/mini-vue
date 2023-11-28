@@ -1,4 +1,5 @@
 import { isObject } from '../reactivity/utils'
+import { ShapeFlags } from '../shared/shapeFlags'
 import { createComponentInstance, setupComponent } from './component'
 
 /**
@@ -37,13 +38,13 @@ function mountChildren(children, el) {
 function mountElement(vnode, container) {
   const el = document.createElement(vnode.type)
   vnode.el = el
-  const { children } = vnode
-  if (typeof children === 'string') {
+  const { children, shapeFlag } = vnode
+  if (shapeFlag & ShapeFlags.TEXT_CHILDREN) {
+    // 渲染text children
     el.textContent = children
-  } else if (Array.isArray(children)) {
+  } else if (shapeFlag & ShapeFlags.ARRAY_CHILDREN) {
+    // 渲染array children
     mountChildren(children, el)
-  } else {
-    mountChildren([children], el)
   }
   for (let prop in vnode.props) {
     const val = vnode.props[prop]
@@ -70,13 +71,12 @@ function setupRenderEffect(instance, container, initialVNode) {
  * @param container
  */
 function patch(vnode, container) {
-  // 判断vnode是不是一个element
-  if (typeof vnode.type === 'string') {
+  if (vnode.shapeFlag & ShapeFlags.ELEMENT) {
+    // 渲染普通节点
     processElement(vnode, container)
-  } else if (isObject(vnode)) {
+  } else if (vnode.shapeFlag & ShapeFlags.STATEFUL_COMPONENT) {
+    // 渲染组件
     processComponent(vnode, container)
-  } else {
-    //
   }
 }
 

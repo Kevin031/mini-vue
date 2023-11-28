@@ -14,28 +14,30 @@ const App = {
       {
         class: ['root']
       },
-      h(
-        'div',
-        {
-          class: ['child']
-        },
-        [
-          h(
-            'p',
-            {
-              class: 'blue'
-            },
-            'hi'
-          ),
-          h(
-            'p',
-            {
-              class: 'red'
-            },
-            this.msg
-          )
-        ]
-      )
+      [
+        h(
+          'div',
+          {
+            class: ['child']
+          },
+          [
+            h(
+              'p',
+              {
+                class: 'blue'
+              },
+              'hi'
+            ),
+            h(
+              'p',
+              {
+                class: 'red'
+              },
+              this.msg
+            )
+          ]
+        )
+      ]
     )
   }
 }
