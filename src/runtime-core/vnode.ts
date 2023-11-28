@@ -7,7 +7,10 @@ export function getShapeFlag(type) {
     : ShapeFlags.STATEFUL_COMPONENT
 }
 
-export function createVNode(type, props = null, children = null) {
+export const Fragment = Symbol('Fragment')
+export const Text = Symbol('Text')
+
+export function createVNode(type, props = null, children: any = null) {
   const vnode = {
     type,
     props,
@@ -30,4 +33,8 @@ export function createVNode(type, props = null, children = null) {
   }
 
   return vnode
+}
+
+export function createTextNode(text: string) {
+  return createVNode(Text, null, text)
 }

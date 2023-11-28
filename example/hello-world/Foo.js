@@ -27,15 +27,16 @@ export const Foo = {
         },
         'click me'
       ),
-      h('div', null, [
-        // 具名插槽
-        renderSlots(this.$slots, 'header', {
-          age: this.fooAge
-        }),
-        h('span', null, 'foo'),
-        renderSlots(this.$slots, 'footer')
-        // renderSlots(this.$slots)
-      ])
+      renderSlots(this.$slots, 'default')
+      // h('div', null, [
+      //   // 具名插槽
+      //   renderSlots(this.$slots, 'header', {
+      //     age: this.fooAge
+      //   }),
+      //   h('span', null, 'foo'),
+      //   renderSlots(this.$slots, 'footer')
+      //   // renderSlots(this.$slots)
+      // ])
     ])
   }
 }

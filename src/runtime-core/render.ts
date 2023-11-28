@@ -1,6 +1,7 @@
 import { isObject } from '../shared/utils'
 import { ShapeFlags } from '../shared/shapeFlags'
 import { createComponentInstance, setupComponent } from './component'
+import { Fragment, Text } from './vnode'
 
 /**
  * 挂载组件
@@ -24,6 +25,14 @@ function processElement(vnode, container) {
   mountElement(vnode, container)
 }
 
+function processFragment(vnode, container) {
+  mountChildren(vnode.children, container)
+}
+
+function processText(vnode, container) {
+  mountTextNode(vnode, container)
+}
+
 function mountChildren(children, el) {
   children.forEach(vnode => {
     patch(vnode, el)
@@ -31,7 +40,7 @@ function mountChildren(children, el) {
 }
 
 /**
- * 挂载元素
+ * 渲染DOM元素
  * @param vnode 虚拟DOM
  * @param container 容器
  */
@@ -59,6 +68,17 @@ function mountElement(vnode, container) {
 }
 
 /**
+ * 渲染文本元素
+ * @param vnode
+ * @param container
+ */
+function mountTextNode(vnode, container) {
+  const el = document.createTextNode(vnode.children)
+  vnode.el = el
+  container.append(el)
+}
+
+/**
  * 渲染组件的虚拟DOM
  * @param instance
  * @param container
@@ -76,12 +96,24 @@ function setupRenderEffect(instance, container, initialVNode) {
  * @param container
  */
 function patch(vnode, container) {
-  if (vnode.shapeFlag & ShapeFlags.ELEMENT) {
-    // 渲染普通节点
-    processElement(vnode, container)
-  } else if (vnode.shapeFlag & ShapeFlags.STATEFUL_COMPONENT) {
-    // 渲染组件
-    processComponent(vnode, container)
+  const { shapeFlag, type } = vnode
+
+  switch (type) {
+    case Fragment:
+      processFragment(vnode, container)
+      break
+    case Text:
+      processText(vnode, container)
+      break
+    default:
+      if (shapeFlag & ShapeFlags.ELEMENT) {
+        // 渲染普通节点
+        processElement(vnode, container)
+      } else if (shapeFlag & ShapeFlags.STATEFUL_COMPONENT) {
+        // 渲染组件
+        processComponent(vnode, container)
+      }
+      break
   }
 }
 

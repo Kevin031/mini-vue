@@ -1,4 +1,4 @@
-import { h } from '../../lib/index.esm.js'
+import { h, createTextNode } from '../../lib/index.esm.js'
 import { Foo } from './Foo.js'
 
 const App = {
@@ -54,6 +54,7 @@ const App = {
             )
           ]
         ),
+        h('div', {}, [h('span', null, 'text节点: '), createTextNode('你好')]),
         h(
           Foo,
           {
@@ -69,6 +70,7 @@ const App = {
             }
           },
           {
+            default: h('span', null, '默认插槽'),
             header: ({ age }) => h('p', {}, 'foo age: ' + age),
             footer: h('p', {}, 'footer slot')
           }
