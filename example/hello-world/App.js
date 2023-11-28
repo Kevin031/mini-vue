@@ -4,7 +4,8 @@ import { Foo } from './Foo.js'
 const App = {
   setup() {
     return {
-      msg: 'mini-vue hhhh'
+      msg: 'mini-vue hhhh',
+      count: 1
     }
   },
 
@@ -54,7 +55,15 @@ const App = {
           Foo,
           {
             msg: this.msg,
-            count: 1
+            count: this.count,
+            onAdd: () => {
+              console.log('onAdd', this)
+              this.count++
+            },
+            onAddFoo: () => {
+              console.log('onAddFoo', this)
+              this.count++
+            }
           },
           null
         )
