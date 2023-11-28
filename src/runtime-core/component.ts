@@ -1,4 +1,6 @@
 import { publicInstancceProxyHnadlers } from './componentPublicInstance'
+import { initProps } from './componentProps'
+import { shallowReadonly } from '../reactivity'
 
 /**
  * 创建组件实例
@@ -22,7 +24,7 @@ function setupStatefulComponent(instance) {
   const Component = instance.type
   const { setup } = Component
   if (typeof setup === 'function') {
-    const setupResult = setup()
+    const setupResult = setup(shallowReadonly(instance.props))
     handleSetupResult(instance, setupResult)
   }
   instance.proxy = new Proxy({ _: instance }, publicInstancceProxyHnadlers)
@@ -49,8 +51,6 @@ function finishedComponentSetup(instance) {
  * @param {object} instance 组件实例
  */
 export function setupComponent(instance) {
-  // initProps
-  const Component = instance.type
-
+  initProps(instance, instance.vnode.props)
   setupStatefulComponent(instance)
 }

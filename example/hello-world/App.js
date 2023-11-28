@@ -1,4 +1,5 @@
 import { h } from '../../lib/index.esm.js'
+import { Foo } from './Foo.js'
 
 const App = {
   setup() {
@@ -48,6 +49,14 @@ const App = {
               this.msg
             )
           ]
+        ),
+        h(
+          Foo,
+          {
+            msg: this.msg,
+            count: 1
+          },
+          null
         )
       ]
     )

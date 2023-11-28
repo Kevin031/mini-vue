@@ -4,11 +4,17 @@ const publicPropertiesMap = {
   $data: i => i.setupState
 }
 
+const hasOwn = (target, key) =>
+  Object.prototype.hasOwnProperty.call(target, key)
+
 export const publicInstancceProxyHnadlers = {
   get({ _: instance }, key) {
-    const { setupState } = instance
-    if (key in setupState) {
+    const { setupState, props } = instance
+    if (hasOwn(setupState, key)) {
       return setupState[key]
+    }
+    if (hasOwn(props, key)) {
+      return props[key]
     }
     const publicGetter = publicPropertiesMap[key]
     if (publicGetter) {
