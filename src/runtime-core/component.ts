@@ -12,13 +12,19 @@ let currentInstance = null
 /**
  * 创建组件实例
  * @param {object} vnode 虚拟DOM
+ * @param {object} parent 父组件的实例
  * @returns {object} 组件实例
  */
-export function createComponentInstance(vnode) {
+export function createComponentInstance(vnode, parent) {
+  // console.log('parent', parent)
   const component = {
     vnode,
     type: vnode.type,
+    props: {},
+    slots: {},
     setupState: {},
+    parent,
+    provides: {},
     emit: () => {}
   }
 
