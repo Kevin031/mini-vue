@@ -1,6 +1,6 @@
 import { pauseTracking, resumeTracking, track, trigger } from './effect'
 import { TrackOptions, TriggerOptions } from './operations'
-import { hasChanged, isObject } from './utils'
+import { hasChanged, isObject } from '../shared/utils'
 import { reactive, readonly, ReactiveFlags } from './index'
 
 let arrayInstrumentations = {}
@@ -24,7 +24,7 @@ let arrayInstrumentations = {}
   }
 })
 
-export const createGetter = (isReadOnly = false) => {
+export const createGetter = (isReadOnly = false, isShallow = false) => {
   /**
    * 读取属性
    * @param {*} target
@@ -45,17 +45,23 @@ export const createGetter = (isReadOnly = false) => {
       return !isReadOnly
     }
 
-    // 依赖收集
-    if (!isReadOnly) {
-      track(target, TrackOptions.GET, key)
-    }
-
     if (arrayInstrumentations[key]) {
       return arrayInstrumentations[key]
     }
 
     // Reflect使用内部方法让this指向代理对象
     const result = Reflect.get(target, key, receiver)
+
+    // 浅层代理
+    if (isShallow) {
+      return result
+    }
+
+    // 依赖收集
+    if (!isReadOnly) {
+      track(target, TrackOptions.GET, key)
+    }
+
     // 深度代理
     if (isObject(result)) {
       return isReadOnly ? readonly(result) : reactive(result)
@@ -109,6 +115,9 @@ export const createSetter = () => {
   }
 }
 
+const shallowReadonlyGet = createGetter(true, true)
+const readonlyGet = createGetter(true)
+
 /**
  * 是否存在属性
  * @param {*} target
@@ -157,7 +166,11 @@ export const readonlyHandlers = {
   get: createGetter(true),
 
   set() {
-    console.warn('can not call set to readonly')
+    console.warn('can not call set to readonly data')
     return true
   }
 }
+
+export const shallowReadonlyHandlers = Object.assign({}, readonlyHandlers, {
+  get: shallowReadonlyGet
+})

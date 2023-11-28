@@ -1,4 +1,8 @@
-import { mutationHandlers, readonlyHandlers } from './handlers'
+import {
+  mutationHandlers,
+  readonlyHandlers,
+  shallowReadonlyHandlers
+} from './handlers'
 
 export const ReactiveFlags = {
   IS_REACTIVE: '__v_isReactive',
@@ -24,6 +28,10 @@ export function reactive(raw) {
 
 export function readonly(raw) {
   return createReactiveObject(raw, readonlyHandlers)
+}
+
+export function shallowReadonly(raw) {
+  return createReactiveObject(raw, shallowReadonlyHandlers)
 }
 
 /**

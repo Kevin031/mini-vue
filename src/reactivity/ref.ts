@@ -1,7 +1,7 @@
 import { track, trigger } from './effect'
 import { TrackOptions, TriggerOptions } from './operations'
 import { ReactiveFlags, reactive } from './reactive'
-import { hasChanged, isObject } from './utils'
+import { hasChanged, isObject } from '../shared/utils'
 
 function convert(value) {
   return isObject(value) ? reactive(value) : value

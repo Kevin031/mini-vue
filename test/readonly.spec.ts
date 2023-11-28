@@ -1,4 +1,10 @@
-import { isReadOnly, readonly, reactive, isProxy } from '../src/reactivity'
+import {
+  isReadOnly,
+  readonly,
+  reactive,
+  isProxy,
+  shallowReadonly
+} from '../src/reactivity'
 
 describe('readonly', () => {
   it('happy path', () => {
@@ -29,5 +35,22 @@ describe('readonly', () => {
     expect(isProxy(original)).toBe(false)
     expect(isProxy(wrapped)).toBe(true)
     expect(isProxy(active)).toBe(true)
+  })
+})
+
+describe('shallowReadonly', () => {
+  it('shoult not make non-reactive properties reactive', () => {
+    const props = shallowReadonly({ n: { foo: 1 } })
+    expect(isReadOnly(props)).toBe(true)
+    expect(isReadOnly(props.n)).toBe(false)
+  })
+
+  it('should call console.warn when set', () => {
+    console.warn = jest.fn()
+    const user = shallowReadonly({
+      age: 10
+    })
+    user.age = 11
+    expect(console.warn).toHaveBeenCalled()
   })
 })
