@@ -16,6 +16,18 @@ const App = {
       },
       [
         h(
+          'button',
+          {
+            onClick: () => {
+              console.log('点击事件')
+            },
+            onMouseEnter: () => {
+              console.log('mouse enter')
+            }
+          },
+          'click me'
+        ),
+        h(
           'div',
           {
             class: ['child']
