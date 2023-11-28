@@ -1,4 +1,4 @@
-import { h } from '../../lib/index.esm.js'
+import { h, renderSlots } from '../../lib/index.esm.js'
 
 export const Foo = {
   setup(props, { emit }) {
@@ -7,11 +7,13 @@ export const Foo = {
       emit('add-foo')
     }
     return {
-      emitAdd
+      emitAdd,
+      fooAge: 18
     }
   },
 
   render() {
+    window.foo = this
     return h('div', {}, [
       h('div', null, 'foo props:'),
       h('div', null, this.msg),
@@ -24,7 +26,16 @@ export const Foo = {
           }
         },
         'click me'
-      )
+      ),
+      h('div', null, [
+        // 具名插槽
+        renderSlots(this.$slots, 'header', {
+          age: this.fooAge
+        }),
+        h('span', null, 'foo'),
+        renderSlots(this.$slots, 'footer')
+        // renderSlots(this.$slots)
+      ])
     ])
   }
 }

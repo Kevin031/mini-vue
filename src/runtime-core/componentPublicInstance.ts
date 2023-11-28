@@ -1,7 +1,9 @@
 const publicPropertiesMap = {
   $el: i => i.vnode.el,
 
-  $data: i => i.setupState
+  $data: i => i.setupState,
+
+  $slots: i => i.slots
 }
 
 const hasOwn = (target, key) =>

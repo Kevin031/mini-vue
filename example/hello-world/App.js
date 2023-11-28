@@ -11,6 +11,9 @@ const App = {
 
   render() {
     window.self = this
+
+    const fooSlot = h('div', null, 'i am slot children')
+
     return h(
       'div',
       {
@@ -65,7 +68,10 @@ const App = {
               this.count++
             }
           },
-          null
+          {
+            header: ({ age }) => h('p', {}, 'foo age: ' + age),
+            footer: h('p', {}, 'footer slot')
+          }
         )
       ]
     )

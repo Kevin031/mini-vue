@@ -1,5 +1,6 @@
 import { publicInstancceProxyHnadlers } from './componentPublicInstance'
 import { initProps } from './componentProps'
+import { initSlots } from './componentSlots'
 import { shallowReadonly } from '../reactivity'
 import { emit } from './componentEmit'
 
@@ -59,5 +60,6 @@ function finishedComponentSetup(instance) {
  */
 export function setupComponent(instance) {
   initProps(instance, instance.vnode.props)
+  initSlots(instance, instance.vnode.children)
   setupStatefulComponent(instance)
 }
