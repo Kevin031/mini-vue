@@ -1,4 +1,4 @@
-import { h, renderSlots } from '../../lib/index.esm.js'
+import { h, renderSlots, getCurrentInstance } from '../../lib/index.esm.js'
 
 export const Foo = {
   setup(props, { emit }) {
@@ -6,6 +6,8 @@ export const Foo = {
       emit('add')
       emit('add-foo')
     }
+    const internalInstance = getCurrentInstance()
+    console.log('internalInstance', internalInstance)
     return {
       emitAdd,
       fooAge: 18
