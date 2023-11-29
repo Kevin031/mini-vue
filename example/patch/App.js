@@ -1,15 +1,24 @@
-import { h, ref } from '../../lib/index.esm.js'
+import { h, ref, nextTick, getCurrentInstance } from '../../lib/index.esm.js'
 import { Foo } from './Foo.js'
 
 const App = {
   setup() {
     const msg = ref('mini-vue hhhh')
+    const instance = getCurrentInstance()
     const setMsg = val => {
       msg.value = val
     }
     const count = ref(1)
     const setCount = val => {
       count.value = val
+    }
+    const setCountQueue = val => {
+      for (let i = count.value; i <= val; i++) {
+        setCount(i)
+      }
+      nextTick(() => {
+        console.log('instance', instance)
+      })
     }
     const rootProps = ref({
       foo: 'foo',
@@ -48,7 +57,8 @@ const App = {
       rootProps,
       changeProps,
       deleteListItem,
-      addListItem
+      addListItem,
+      setCountQueue
     }
   },
 
@@ -62,6 +72,7 @@ const App = {
         ...this.rootProps
       },
       [
+        h('div', null, `count:` + this.count),
         h('span', null, 'parent msg' + this.msg),
         h(Foo, {
           msg: this.msg

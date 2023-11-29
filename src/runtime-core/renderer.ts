@@ -4,6 +4,7 @@ import { Fragment, Text } from './vnode'
 import { createAppAPI } from './createApp'
 import { effect } from '../reactivity'
 import { shouldUpdateComponent } from './componentUpdateUtils'
+import { queueJobs } from './scheduler'
 
 /**
  * 自定义渲染器
@@ -243,35 +244,6 @@ export function createRenderer(options) {
         patchKeyedChildren(c1, c2, container, parentComponent, anchor)
       }
     }
-    // // 修改children
-    // const oldChildren = n1.children
-    // const newChildren = n2.children
-    // if (typeof newChildren === 'string') {
-    //   if (typeof oldChildren === 'string') {
-    //     if (newChildren !== oldChildren) {
-    //       el.textContent = newChildren
-    //     }
-    //   } else {
-    //     el.textContent = newChildren
-    //   }
-    // } else if (Array.isArray(oldChildren) && Array.isArray(newChildren)) {
-    //   // 比较数组子元素
-    //   const commonLength = Math.min(oldChildren.length, newChildren.length)
-    //   // 修改
-    //   for (let i = 0; i < commonLength; i++) {
-    //     patchElement(oldChildren[i], newChildren[i], el, parentComponent)
-    //   }
-    //   // 新增和删除
-    //   if (newChildren.length > oldChildren.length) {
-    //     for (let i = oldChildren.length; i < newChildren.length; i++) {
-    //       mountElement(newChildren[i], container, parentComponent)
-    //     }
-    //   }
-    //   if (newChildren.length < oldChildren.length) {
-    //     oldChildren
-    //       .slice(newChildren.length)
-    //       .forEach(child => el.removeChild(child))
-    //   }
   }
 
   function unmountChildren(children) {
@@ -352,27 +324,34 @@ export function createRenderer(options) {
    * @param container
    */
   function setupRenderEffect(instance, container, initialVNode) {
-    instance.update = effect(() => {
-      const { proxy } = instance
-      if (!instance.isMounted) {
-        const subTree = instance.render.call(proxy)
-        instance.subTree = subTree
-        patch(null, subTree, container, instance, null)
-        initialVNode.el = subTree.el
-        instance.isMounted = true
-      } else {
-        // 需要一个更新后的vnode
-        const { next, vnode } = instance
-        if (next) {
-          next.el = vnode.el
-          updateComponentPreRender(instance, next)
+    instance.update = effect(
+      () => {
+        const { proxy } = instance
+        if (!instance.isMounted) {
+          const subTree = instance.render.call(proxy)
+          instance.subTree = subTree
+          patch(null, subTree, container, instance, null)
+          initialVNode.el = subTree.el
+          instance.isMounted = true
+        } else {
+          // 需要一个更新后的vnode
+          const { next, vnode } = instance
+          if (next) {
+            next.el = vnode.el
+            updateComponentPreRender(instance, next)
+          }
+          const subTree = instance.render.call(proxy)
+          const preSubTree = instance.subTree
+          instance.subTree = subTree
+          patch(preSubTree, subTree, container, instance, null)
         }
-        const subTree = instance.render.call(proxy)
-        const preSubTree = instance.subTree
-        instance.subTree = subTree
-        patch(preSubTree, subTree, container, instance, null)
+      },
+      {
+        scheduler() {
+          queueJobs(instance.update)
+        }
       }
-    })
+    )
   }
 
   /**
