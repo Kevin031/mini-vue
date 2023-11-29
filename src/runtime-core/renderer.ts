@@ -3,6 +3,7 @@ import { createComponentInstance, setupComponent } from './component'
 import { Fragment, Text } from './vnode'
 import { createAppAPI } from './createApp'
 import { effect } from '../reactivity'
+import { shouldUpdateComponent } from './componentUpdateUtils'
 
 /**
  * 自定义渲染器
@@ -19,21 +20,53 @@ export function createRenderer(options) {
 
   /**
    * 挂载组件
-   * @param vnode 虚拟DOM
-   * @param container 容器
+   * @param n1
+   * @param n2
+   * @param container
+   * @param parentComponent
    */
   function mountComponent(n1, n2, container, parentComponent) {
     // 获取组件实例
     const initialVNode = n2
     const instance = createComponentInstance(initialVNode, parentComponent)
+    initialVNode.component = instance
     // 执行setup方法
     setupComponent(instance)
     // 执行渲染effect
     setupRenderEffect(instance, container, initialVNode)
   }
 
+  /**
+   * 更新组件
+   * @param n1
+   * @param n2
+   * @param container
+   * @param parentComponent
+   */
+  function updateComponent(n1, n2) {
+    const instance = n1.component
+    n2.component = instance
+    if (shouldUpdateComponent(n1, n2)) {
+      instance.next = n2
+      instance.update()
+    } else {
+      n2.el = n1.el
+      instance.vnode = n2
+    }
+  }
+
+  function updateComponentPreRender(instance, nextVNode) {
+    instance.vnode = nextVNode
+    instance.next = null
+    instance.props = nextVNode.props
+  }
+
   function processComponent(n1, n2, container, parentComponent) {
-    mountComponent(n1, n2, container, parentComponent)
+    if (n1) {
+      updateComponent(n1, n2)
+    } else {
+      mountComponent(n1, n2, container, parentComponent)
+    }
   }
 
   function processElement(n1, n2, container, parentComponent, anchor = null) {
@@ -102,6 +135,18 @@ export function createRenderer(options) {
     }
   }
 
+  /**
+   * 比较数组执行更新
+   * 1. 增
+   * 2. 删
+   * 3. 改
+   * 4. 排序
+   * @param c1 旧的子节点数组
+   * @param c2 新的子节点数组
+   * @param container 容器element
+   * @param parentComponent 父组件实例
+   * @param parentAnchor 锚点
+   */
   function patchKeyedChildren(
     c1,
     c2,
@@ -307,7 +352,7 @@ export function createRenderer(options) {
    * @param container
    */
   function setupRenderEffect(instance, container, initialVNode) {
-    effect(() => {
+    instance.update = effect(() => {
       const { proxy } = instance
       if (!instance.isMounted) {
         const subTree = instance.render.call(proxy)
@@ -316,6 +361,12 @@ export function createRenderer(options) {
         initialVNode.el = subTree.el
         instance.isMounted = true
       } else {
+        // 需要一个更新后的vnode
+        const { next, vnode } = instance
+        if (next) {
+          next.el = vnode.el
+          updateComponentPreRender(instance, next)
+        }
         const subTree = instance.render.call(proxy)
         const preSubTree = instance.subTree
         instance.subTree = subTree

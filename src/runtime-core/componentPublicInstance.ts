@@ -3,7 +3,9 @@ const publicPropertiesMap = {
 
   $data: i => i.setupState,
 
-  $slots: i => i.slots
+  $slots: i => i.slots,
+
+  $props: i => i.props
 }
 
 const hasOwn = (target, key) =>

@@ -4,6 +4,9 @@ import { Foo } from './Foo.js'
 const App = {
   setup() {
     const msg = ref('mini-vue hhhh')
+    const setMsg = val => {
+      msg.value = val
+    }
     const count = ref(1)
     const setCount = val => {
       count.value = val
@@ -38,6 +41,7 @@ const App = {
     }
     return {
       msg,
+      setMsg,
       count,
       list,
       setCount,
@@ -58,6 +62,10 @@ const App = {
         ...this.rootProps
       },
       [
+        h('span', null, 'parent msg' + this.msg),
+        h(Foo, {
+          msg: this.msg
+        }),
         h('ul', null, [
           ...this.list.map(item =>
             h('li', { class: ['list-item'], key: item.key }, item.title)
