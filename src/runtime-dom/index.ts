@@ -38,8 +38,8 @@ function patchProp(el, prop, value) {
  * @param {Element} el 子节点
  * @param {Element} parent 父节点
  */
-function insert(el: Element, parent: Element) {
-  parent.append(el)
+function insert(el: Element, parent: Element, anchor: Element) {
+  parent.insertBefore(el, anchor || null)
 }
 
 /**

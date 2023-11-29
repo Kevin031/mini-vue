@@ -10,11 +10,12 @@ export function getShapeFlag(type) {
 export const Fragment = Symbol('Fragment')
 export const Text = Symbol('Text')
 
-export function createVNode(type, props = null, children: any = null) {
+export function createVNode(type, props: any = {}, children: any = null) {
   const vnode = {
     type,
-    props,
+    props: props || {},
     children,
+    key: props ? props.key : undefined,
     shapeFlag: getShapeFlag(type),
     el: null
   }

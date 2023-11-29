@@ -13,19 +13,28 @@ const App = {
       bar: 'bar'
     })
     const list = ref([
-      { title: 'list item 1' },
-      { title: 'list item 2' },
-      { title: 'list item 3' },
-      { title: 'list item 4' },
-      { title: 'list item 5' },
-      { title: 'list item 6' },
-      { title: 'list item 7' }
+      { title: 'list item A', key: 'A' },
+      { title: 'list item B', key: 'B' },
+      { title: 'list item C', key: 'C' },
+      { title: 'list item D', key: 'D' },
+      { title: 'list item E', key: 'E' }
     ])
     const deleteListItem = idx => {
       list.value = list.value.filter((_, index) => index !== idx)
     }
     const changeProps = props => {
       rootProps.value = props
+    }
+    const addListItem = () => {
+      list.value = [
+        { title: 'list item A', key: 'A' },
+        { title: 'list item B', key: 'B' },
+        { title: 'list item C', key: 'C' },
+        { title: 'list item F', key: 'F' },
+        { title: 'list item G', key: 'G' },
+        { title: 'list item D', key: 'D' },
+        { title: 'list item E', key: 'E' }
+      ]
     }
     return {
       msg,
@@ -34,7 +43,8 @@ const App = {
       setCount,
       rootProps,
       changeProps,
-      deleteListItem
+      deleteListItem,
+      addListItem
     }
   },
 
@@ -50,7 +60,7 @@ const App = {
       [
         h('ul', null, [
           ...this.list.map(item =>
-            h('li', { class: ['list-item'] }, item.title)
+            h('li', { class: ['list-item'], key: item.key }, item.title)
           )
         ]),
         h(
@@ -59,6 +69,13 @@ const App = {
             onClick: () => this.deleteListItem(2)
           },
           '删除第三个元素'
+        ),
+        h(
+          'button',
+          {
+            onClick: () => this.addListItem()
+          },
+          '新增元素'
         )
       ]
       // [
