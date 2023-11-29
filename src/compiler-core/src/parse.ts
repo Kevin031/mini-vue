@@ -5,30 +5,69 @@ const enum TagType {
   End
 }
 
+/**
+ * 解析内容
+ * @param content
+ * @returns
+ */
 export function baseParse(content: string) {
   const context = createParserContext(content)
+  return createRoot(parseChildren(context, []))
+}
+
+/**
+ * 创建解析上下文
+ * @param content
+ * @returns
+ */
+function createParserContext(content) {
+  const context = {
+    source: content
+  }
   return context
 }
 
-function createParserContext(content) {
-  const context = parseChildren({ source: content })
-  return createRoot(context)
+/**
+ * 判断是否结束解析
+ * @param context
+ * @returns
+ */
+function isEnd(context, ancestors) {
+  const s = context.source
+
+  if (s.startsWith('</')) {
+    for (let i = ancestors.length - 1; i >= 0; i--) {
+      const tag = ancestors[i].tag
+      if (startsWithEngTagOpen(s, tag)) {
+        return true
+      }
+    }
+  }
+
+  return !s
 }
 
-function parseChildren(context) {
+/**
+ * 解析children
+ * @param context
+ * @returns
+ */
+function parseChildren(context, ancestors) {
   const nodes: any[] = []
-  let node
-  const s = context.source
-  if (s.startsWith('{{')) {
-    node = parseInterpolation(context)
-  } else if (s[0] === '<') {
-    if (/[a-z]/.test(s[1])) {
-      node = parseElement(context)
+  while (!isEnd(context, ancestors)) {
+    let node
+    const s = context.source
+    if (s.startsWith('{{')) {
+      node = parseInterpolation(context)
+    } else if (s[0] === '<') {
+      if (/[a-z]/.test(s[1])) {
+        node = parseElement(context, ancestors)
+      }
+    } else {
+      node = parseText(context)
     }
-  } else {
-    node = parseText(context)
+    nodes.push(node)
   }
-  nodes.push(node)
   return nodes
 }
 
@@ -37,12 +76,13 @@ function parseChildren(context) {
  * @param context
  * @param length
  */
-function advanceBy(context, length) {
+export function advanceBy(context, length) {
   context.source = context.source.slice(length)
 }
 
 function parseTag(context, type: TagType) {
   const match: any = /^<(\/?[a-z]*)/i.exec(context.source)
+  if (!match) return
   const tag = match[1]
   advanceBy(context, match[0].length)
   advanceBy(context, 1)
@@ -54,6 +94,12 @@ function parseTag(context, type: TagType) {
   }
 }
 
+/**
+ * 解析和推进text内容
+ * @param context
+ * @param length
+ * @returns
+ */
 function parseTextData(context, length) {
   const content = context.source.slice(0, length)
   // 推进
@@ -61,24 +107,62 @@ function parseTextData(context, length) {
   return content
 }
 
+/**
+ * 解析文本内容
+ * @param context
+ * @returns
+ */
 function parseText(context) {
+  let endIndex = context.source.length
+  let endTokens = ['{{', '</']
+  for (let i = 0; i < endTokens.length; i++) {
+    let index = context.source.indexOf(endTokens[i])
+    if (index !== -1 && endIndex > index) {
+      endIndex = index
+    }
+  }
+
   // 获取content
-  const content = parseTextData(context, context.source.length)
+  const content = parseTextData(context, endIndex)
   return {
     type: NodeTypes.TEXT,
     content: content
   }
 }
 
-function parseElement(context) {
-  // 解析tag
-  const element = parseTag(context, TagType.Start)
-  // 删除处理完成的代码
-  parseTag(context, TagType.End)
-
-  return element
+function startsWithEngTagOpen(source, tag) {
+  return (
+    source.startsWith('</') &&
+    source.slice(2, 2 + tag.length).toLowerCase() === tag.toLowerCase()
+  )
 }
 
+/**
+ * 解析element元素
+ * @param context
+ * @param ancestors 祖先元素上下文
+ * @returns
+ */
+function parseElement(context, ancestors) {
+  // 解析tag
+  const element: any = parseTag(context, TagType.Start)
+  ancestors.push(element)
+  element.children = parseChildren(context, ancestors)
+  ancestors.pop()
+  // 删除结束标签
+  if (startsWithEngTagOpen(context.source, element.tag)) {
+    parseTag(context, TagType.End)
+    return element
+  } else {
+    throw new Error(`缺少结束标签${element.tag}`)
+  }
+}
+
+/**
+ * 解析插值节点
+ * @param context
+ * @returns
+ */
 function parseInterpolation(context) {
   const openDelimiter = '{{'
   const closeDelimiter = '}}'
@@ -98,7 +182,7 @@ function parseInterpolation(context) {
   const content = rawContent.trim()
 
   // 删除匹配到的部分
-  context.source = context.source.slice(rawContentLength + 2)
+  context.source = context.source.slice(2)
 
   return {
     type: NodeTypes.INTERPOLATION,
@@ -109,6 +193,11 @@ function parseInterpolation(context) {
   }
 }
 
+/**
+ * 解析根节点
+ * @param children
+ * @returns
+ */
 function createRoot(children) {
   return {
     children
