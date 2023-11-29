@@ -25,6 +25,8 @@ function parseChildren(context) {
     if (/[a-z]/.test(s[1])) {
       node = parseElement(context)
     }
+  } else {
+    node = parseText(context)
   }
   nodes.push(node)
   return nodes
@@ -52,6 +54,22 @@ function parseTag(context, type: TagType) {
   }
 }
 
+function parseTextData(context, length) {
+  const content = context.source.slice(0, length)
+  // 推进
+  advanceBy(context, content.length)
+  return content
+}
+
+function parseText(context) {
+  // 获取content
+  const content = parseTextData(context, context.source.length)
+  return {
+    type: NodeTypes.TEXT,
+    content: content
+  }
+}
+
 function parseElement(context) {
   // 解析tag
   const element = parseTag(context, TagType.Start)
@@ -76,7 +94,7 @@ function parseInterpolation(context) {
   const rawContentLength = closeIndex - closeDelimiter.length
 
   // 匹配花括号内的内容
-  const rawContent = context.source.slice(0, rawContentLength)
+  const rawContent = parseTextData(context, rawContentLength)
   const content = rawContent.trim()
 
   // 删除匹配到的部分
