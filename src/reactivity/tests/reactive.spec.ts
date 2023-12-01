@@ -1,4 +1,4 @@
-import { reactive, ref, effect, isReactive } from '../src/reactivity'
+import { reactive, ref, effect, isReactive } from '../src'
 
 describe('reactive', () => {
   const obj = { a: 1, b: 2, foo: { val: 3 } }

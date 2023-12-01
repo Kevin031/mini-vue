@@ -1,4 +1,4 @@
-import { computed, ref } from '../src/reactivity'
+import { computed, ref } from '../src'
 
 describe('验证computed功能', () => {
   it('只定义getter', () => {

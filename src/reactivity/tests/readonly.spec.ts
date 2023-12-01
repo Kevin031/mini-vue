@@ -4,7 +4,7 @@ import {
   reactive,
   isProxy,
   shallowReadonly
-} from '../src/reactivity'
+} from '../src'
 
 describe('readonly', () => {
   it('happy path', () => {

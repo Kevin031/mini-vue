@@ -1,6 +1,6 @@
 import { pauseTracking, resumeTracking, track, trigger } from './effect'
 import { TrackOptions, TriggerOptions } from './operations'
-import { hasChanged, isObject } from '../shared/utils'
+import { hasChanged, isObject } from '../../shared/utils'
 import { reactive, readonly, ReactiveFlags } from './index'
 
 let arrayInstrumentations = {}

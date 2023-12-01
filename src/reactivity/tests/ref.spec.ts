@@ -1,4 +1,4 @@
-import { ref, isRef, unRef, proxyRefs } from '../src/reactivity'
+import { ref, isRef, unRef, proxyRefs } from '../src'
 
 describe('ref', () => {
   it('happy path', () => {

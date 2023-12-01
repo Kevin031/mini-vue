@@ -2,7 +2,7 @@ import { ShapeFlags } from '../shared/shapeFlags'
 import { createComponentInstance, setupComponent } from './component'
 import { Fragment, Text } from './vnode'
 import { createAppAPI } from './createApp'
-import { effect } from '../reactivity'
+import { effect } from '../reactivity/src'
 import { shouldUpdateComponent } from './componentUpdateUtils'
 import { queueJobs } from './scheduler'
 

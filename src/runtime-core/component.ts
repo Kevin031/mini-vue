@@ -1,9 +1,9 @@
 import { publicInstancceProxyHnadlers } from './componentPublicInstance'
 import { initProps } from './componentProps'
 import { initSlots } from './componentSlots'
-import { shallowReadonly } from '../reactivity'
+import { shallowReadonly } from '../reactivity/src'
 import { emit } from './componentEmit'
-import { proxyRefs } from '../reactivity'
+import { proxyRefs } from '../reactivity/src'
 
 /**
  * 调用setup的时候，指向当前的组件
