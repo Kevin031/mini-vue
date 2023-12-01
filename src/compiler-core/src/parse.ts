@@ -60,7 +60,13 @@ function parseChildren(context, ancestors) {
     if (s.startsWith('{{')) {
       node = parseInterpolation(context)
     } else if (s[0] === '<') {
-      if (/[a-z]/.test(s[1])) {
+      if (s[1] === '/') {
+        if (/[a-z]/i.test(s[2])) {
+          // 匹配 </div>
+          parseTag(context, TagType.End)
+          continue
+        }
+      } else if (/[a-z]/i.test(s[1])) {
         node = parseElement(context, ancestors)
       }
     } else {
@@ -86,7 +92,9 @@ function parseTag(context, type: TagType) {
   const tag = match[1]
   advanceBy(context, match[0].length)
   advanceBy(context, 1)
-  if (type === TagType.End) return
+  if (type === TagType.End) {
+    return
+  }
 
   return {
     type: NodeTypes.ElEMENT,
@@ -114,9 +122,13 @@ function parseTextData(context, length) {
  */
 function parseText(context) {
   let endIndex = context.source.length
-  let endTokens = ['{{', '</']
+  let endTokens = ['{{', '<']
   for (let i = 0; i < endTokens.length; i++) {
     let index = context.source.indexOf(endTokens[i])
+    // endIndex > index 是需要要 endIndex 尽可能的小
+    // 比如说：
+    // hi, {{123}} <div></div>
+    // 那么这里就应该停到 {{ 这里，而不是停到 <div 这里
     if (index !== -1 && endIndex > index) {
       endIndex = index
     }

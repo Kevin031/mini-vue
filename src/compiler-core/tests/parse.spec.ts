@@ -96,6 +96,34 @@ describe('Parse', () => {
     })
   })
 
+  test('nest element 2', () => {
+    const ast = baseParse('<div>hi,<p>{{ message }}</p></div>')
+
+    expect(ast.children[0]).toStrictEqual({
+      type: NodeTypes.ElEMENT,
+      tag: 'div',
+      children: [
+        {
+          type: NodeTypes.TEXT,
+          content: 'hi,'
+        },
+        {
+          type: NodeTypes.ElEMENT,
+          tag: 'p',
+          children: [
+            {
+              type: NodeTypes.INTERPOLATION,
+              content: {
+                type: NodeTypes.SIMPLE_EXPRESSION,
+                content: 'message'
+              }
+            }
+          ]
+        }
+      ]
+    })
+  })
+
   test('should throw error when lack end tag', () => {
     expect(() => {
       baseParse('<div><span></div>')

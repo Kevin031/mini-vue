@@ -1,4 +1,11 @@
 /**
+ * 传入的值是否为字符串
+ */
+export function isString(target) {
+  return typeof target === 'string'
+}
+
+/**
  * 传入的值是否为一个对象
  * @param {any} target
  * @returns
